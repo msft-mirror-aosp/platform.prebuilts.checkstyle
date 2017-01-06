@@ -28,9 +28,9 @@ import tempfile
 import xml.dom.minidom
 import gitlint.git as git
 
+
 def _FindFoldersContaining(root, wanted):
-  """Searches recursively from root to find directories that has a file with
-  the given name.
+  """Recursively finds directories that have a file with the given name.
 
   Args:
     root: Root folder to start the search from.
@@ -40,16 +40,18 @@ def _FindFoldersContaining(root, wanted):
     List of folders that has a file with the given name
   """
 
+  if not root:
+    return []
   if os.path.islink(root):
     return []
   result = []
-  for fileName in os.listdir(root):
-    filePath = os.path.join(root, fileName)
-    if os.path.isdir(filePath):
-      subResult = _FindFoldersContaining(filePath, wanted)
-      result.extend(subResult)
+  for file_name in os.listdir(root):
+    file_path = os.path.join(root, file_name)
+    if os.path.isdir(file_path):
+      sub_result = _FindFoldersContaining(file_path, wanted)
+      result.extend(sub_result)
     else:
-      if fileName == wanted:
+      if file_name == wanted:
         result.append(root)
   return result
 
@@ -61,8 +63,8 @@ FORCED_RULES = ['com.puppycrawl.tools.checkstyle.checks.imports.ImportOrderCheck
 SKIPPED_RULES_FOR_TEST_FILES = ['com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTypeCheck',
                                 'com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck']
 SUBPATH_FOR_TEST_FILES = ['/tests/', '/test/', '/androidTest/']
-SUBPATH_FOR_TEST_DATA_FILES = _FindFoldersContaining(os.path.dirname(os.getcwd()),
-                                                     "IGNORE_CHECKSTYLE")
+SUBPATH_FOR_TEST_DATA_FILES = _FindFoldersContaining(git.repository_root(),
+                                                     'IGNORE_CHECKSTYLE')
 ERROR_UNCOMMITTED = 'You need to commit all modified files before running Checkstyle\n'
 ERROR_UNTRACKED = 'You have untracked java files that are not being checked:\n'
 
@@ -105,6 +107,9 @@ def RunCheckstyleOnACommit(commit,
   Returns:
     A tuple of errors and warnings.
   """
+  if not git.repository_root():
+    print 'FAILURE: not inside a git repository'
+    sys.exit(1)
   explicit_commit = commit is not None
   if not explicit_commit:
     _WarnIfUntrackedFiles()
