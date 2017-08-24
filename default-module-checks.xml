@@ -16,15 +16,6 @@
 -->
 <property name="severity" value="warning"/>
 <property name="charset" value="UTF-8"/>
-<module name="SuppressionCommentFilter">
-  <property name="offCommentFormat" value="CHECKSTYLE:OFF IndentationCheck"/>
-  <property name="onCommentFormat" value="CHECKSTYLE:ON IndentationCheck"/>
-  <property name="checkFormat" value="IndentationCheck"/>
-</module>
-<module name="SuppressionCommentFilter">
-  <property name="offCommentFormat" value="CHECKSTYLE:OFF Generated code"/>
-  <property name="onCommentFormat" value="CHECKSTYLE:ON Generated code"/>
-</module>
 <module name="FileTabCharacter">
   <property name="severity" value="error"/>
 </module>
