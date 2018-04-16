@@ -80,7 +80,7 @@ def RunCheckstyleOnFiles(java_files, classpath=CHECKSTYLE_JAR, config_xml=CHECKS
   Returns:
     A tuple of errors and warnings.
   """
-  print 'Running Checkstyle on inputted files'
+  print('Running Checkstyle on inputted files')
   java_files = map(os.path.abspath, java_files)
   stdout = _ExecuteCheckstyle(java_files, classpath, config_xml)
   (errors, warnings) = _ParseAndFilterOutput(stdout)
@@ -108,17 +108,17 @@ def RunCheckstyleOnACommit(commit,
     A tuple of errors and warnings.
   """
   if not git.repository_root():
-    print 'FAILURE: not inside a git repository'
+    print('FAILURE: not inside a git repository')
     sys.exit(1)
   explicit_commit = commit is not None
   if not explicit_commit:
     _WarnIfUntrackedFiles()
     commit = git.last_commit()
-  print 'Running Checkstyle on %s commit' % commit
+  print('Running Checkstyle on %s commit' % commit)
   commit_modified_files = _GetModifiedFiles(commit, explicit_commit)
   commit_modified_files = _FilterFiles(commit_modified_files, file_whitelist)
   if not commit_modified_files.keys():
-    print 'No Java files to check'
+    print('No Java files to check')
     return [], []
 
   (tmp_dir, tmp_file_map) = _GetTempFilesForCommit(
@@ -153,11 +153,9 @@ def _WarnIfUntrackedFiles(out=sys.stdout):
 def _PrintErrorsAndWarnings(errors, warnings):
   """Prints given errors and warnings."""
   if errors:
-    print 'ERRORS:'
-    print '\n'.join(errors)
+    print('ERRORS:\n'.join(errors))
   if warnings:
-    print 'WARNINGS:'
-    print '\n'.join(warnings)
+    print('WARNINGS:\n%s'.join(warnings))
 
 
 def _ExecuteCheckstyle(java_files, classpath, config_xml):
@@ -174,21 +172,21 @@ def _ExecuteCheckstyle(java_files, classpath, config_xml):
   # Run checkstyle
   checkstyle_env = os.environ.copy()
   checkstyle_env['JAVA_CMD'] = 'java'
+
   try:
     check = subprocess.Popen(['java', '-cp', classpath,
                               'com.puppycrawl.tools.checkstyle.Main', '-c',
                               config_xml, '-f', 'xml'] + java_files,
                              stdout=subprocess.PIPE, env=checkstyle_env)
     stdout, _ = check.communicate()
+    # A work-around for Checkstyle printing error count to stdio.
+    if 'Checkstyle ends with' in stdout.splitlines()[-1]:
+      stdout = '\n'.join(stdout.splitlines()[:-1])
+    return stdout
   except OSError as e:
     if e.errno == errno.ENOENT:
-      print 'Error running Checkstyle!'
+      print('Error running Checkstyle!')
       sys.exit(1)
-
-  # A work-around for Checkstyle printing error count to stdio.
-  if 'Checkstyle ends with' in stdout.splitlines()[-1]:
-    stdout = '\n'.join(stdout.splitlines()[:-1])
-  return stdout
 
 
 def _ParseAndFilterOutput(stdout,
@@ -339,7 +337,7 @@ def main(args=None):
   config_xml = args.config_xml or CHECKSTYLE_STYLE
 
   if not os.path.exists(config_xml):
-    print 'Java checkstyle configuration file is missing'
+    print('Java checkstyle configuration file is missing')
     sys.exit(1)
 
   classpath = CHECKSTYLE_JAR
@@ -357,7 +355,7 @@ def main(args=None):
   if errors or warnings:
     sys.exit(1)
 
-  print 'SUCCESS! NO ISSUES FOUND'
+  print('SUCCESS! NO ISSUES FOUND')
   sys.exit(0)
 
 
