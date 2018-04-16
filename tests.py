@@ -18,7 +18,11 @@
 
 """Tests the Checkstyle script used to run style checks on Java files."""
 
-from StringIO import StringIO
+try:
+  from StringIO import StringIO
+except ImportError:
+  # python3 use io instead of StringIO
+  from io import StringIO
 import unittest
 import checkstyle
 
