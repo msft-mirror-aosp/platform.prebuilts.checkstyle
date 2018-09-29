@@ -210,7 +210,6 @@
 <module name="OuterTypeFilename">
   <property name="severity" value="error"/>
 </module>
-<module name="FileContentsHolder"/>
 <module name="SuppressionCommentFilter">
   <property name="offCommentFormat" value="CHECKSTYLE:OFF IndentationCheck"/>
   <property name="onCommentFormat" value="CHECKSTYLE:ON IndentationCheck"/>
