@@ -152,13 +152,10 @@ def _WarnIfUntrackedFiles(out=sys.stdout):
 
 def _PrintErrorsAndWarnings(errors, warnings):
   """Prints given errors and warnings."""
-  system_encoding = sys.getdefaultencoding()
-  if (system_encoding == 'ascii'):
-    system_encoding = 'UTF-8'
   if errors:
-    print('ERRORS:\n' + '\n'.join(map(lambda x: x.encode(system_encoding), errors)))
+    print('ERRORS:\n'.join(errors))
   if warnings:
-    print('WARNINGS:\n' + '\n'.join(map(lambda x: x.encode(system_encoding), warnings)))
+    print('WARNINGS:\n%s'.join(warnings))
 
 
 def _ExecuteCheckstyle(java_files, classpath, config_xml):
@@ -183,7 +180,7 @@ def _ExecuteCheckstyle(java_files, classpath, config_xml):
                              stdout=subprocess.PIPE, env=checkstyle_env)
     stdout, _ = check.communicate()
     # A work-around for Checkstyle printing error count to stdio.
-    if '</checkstyle>' in stdout.splitlines()[-2]:
+    if 'Checkstyle ends with' in stdout.splitlines()[-1]:
       stdout = '\n'.join(stdout.splitlines()[:-1])
     return stdout
   except OSError as e:
