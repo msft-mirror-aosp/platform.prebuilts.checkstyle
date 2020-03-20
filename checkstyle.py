@@ -18,6 +18,8 @@
 
 """Script that is used by developers to run style checks on Java files."""
 
+from __future__ import print_function
+
 import argparse
 import errno
 import os
@@ -81,7 +83,7 @@ def RunCheckstyleOnFiles(java_files, classpath=CHECKSTYLE_JAR, config_xml=CHECKS
     A tuple of errors and warnings.
   """
   print('Running Checkstyle on inputted files')
-  java_files = map(os.path.abspath, java_files)
+  java_files = list(map(os.path.abspath, java_files))
   stdout = _ExecuteCheckstyle(java_files, classpath, config_xml)
   (errors, warnings) = _ParseAndFilterOutput(stdout)
   _PrintErrorsAndWarnings(errors, warnings)
@@ -117,14 +119,14 @@ def RunCheckstyleOnACommit(commit,
   print('Running Checkstyle on %s commit' % commit)
   commit_modified_files = _GetModifiedFiles(commit, explicit_commit)
   commit_modified_files = _FilterFiles(commit_modified_files, file_whitelist)
-  if not commit_modified_files.keys():
+  if not list(commit_modified_files.keys()):
     print('No Java files to check')
     return [], []
 
   (tmp_dir, tmp_file_map) = _GetTempFilesForCommit(
-      commit_modified_files.keys(), commit)
+      list(commit_modified_files.keys()), commit)
 
-  java_files = tmp_file_map.keys()
+  java_files = list(tmp_file_map.keys())
   stdout = _ExecuteCheckstyle(java_files, classpath, config_xml)
 
   # Remove all the temporary files.
@@ -152,13 +154,10 @@ def _WarnIfUntrackedFiles(out=sys.stdout):
 
 def _PrintErrorsAndWarnings(errors, warnings):
   """Prints given errors and warnings."""
-  system_encoding = sys.getdefaultencoding()
-  if (system_encoding == 'ascii'):
-    system_encoding = 'UTF-8'
   if errors:
-    print('ERRORS:\n' + '\n'.join(map(lambda x: x.encode(system_encoding), errors)))
+    print('ERRORS:\n' + '\n'.join(errors))
   if warnings:
-    print('WARNINGS:\n' + '\n'.join(map(lambda x: x.encode(system_encoding), warnings)))
+    print('WARNINGS:\n' + '\n'.join(warnings))
 
 
 def _ExecuteCheckstyle(java_files, classpath, config_xml):
@@ -180,7 +179,8 @@ def _ExecuteCheckstyle(java_files, classpath, config_xml):
     check = subprocess.Popen(['java', '-cp', classpath,
                               'com.puppycrawl.tools.checkstyle.Main', '-c',
                               config_xml, '-f', 'xml'] + java_files,
-                             stdout=subprocess.PIPE, env=checkstyle_env)
+                             stdout=subprocess.PIPE, env=checkstyle_env,
+                             universal_newlines=True)
     stdout, _ = check.communicate()
     # A work-around for Checkstyle printing error count to stdio.
     if '</checkstyle>' in stdout.splitlines()[-2]:
@@ -314,7 +314,7 @@ def _GetTempFilesForCommit(file_names, commit):
     if not os.path.exists(os.path.dirname(tmp_file_name)):
       os.makedirs(os.path.dirname(tmp_file_name))
 
-    tmp_file = open(tmp_file_name, 'w')
+    tmp_file = open(tmp_file_name, 'wb')
     tmp_file.write(content)
     tmp_file.close()
     tmp_file_names[tmp_file_name] = file_name
