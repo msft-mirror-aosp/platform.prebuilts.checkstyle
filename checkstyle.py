@@ -182,9 +182,12 @@ def _ExecuteCheckstyle(java_files, classpath, config_xml):
                              stdout=subprocess.PIPE, env=checkstyle_env,
                              universal_newlines=True)
     stdout, _ = check.communicate()
+    stdout_lines = stdout.splitlines()
     # A work-around for Checkstyle printing error count to stdio.
-    if '</checkstyle>' in stdout.splitlines()[-2]:
-      stdout = '\n'.join(stdout.splitlines()[:-1])
+    if len(stdout_lines) < 2:
+      stdout = stdout_lines[0]
+    elif len(stdout_lines) >= 2 and '</checkstyle>' in stdout_lines[-2]:
+      stdout = '\n'.join(stdout_lines[:-1])
     return stdout
   except OSError as e:
     if e.errno == errno.ENOENT:
