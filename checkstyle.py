@@ -64,7 +64,8 @@ FORCED_RULES = ['com.puppycrawl.tools.checkstyle.checks.imports.ImportOrderCheck
                 'com.puppycrawl.tools.checkstyle.checks.imports.UnusedImportsCheck']
 SKIPPED_RULES_FOR_TEST_FILES = ['com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTypeCheck',
                                 'com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck']
-SUBPATH_FOR_TEST_FILES = ['/tests/', '/test/', '/androidTest/', '/perftests/']
+SUBPATH_FOR_TEST_FILES = ['/tests/', '/test/', '/androidTest/', '/perftests/', '/gts-tests/',
+                          '/hostsidetests/']
 SUBPATH_FOR_TEST_DATA_FILES = _FindFoldersContaining(git.repository_root(),
                                                      'IGNORE_CHECKSTYLE')
 ERROR_UNCOMMITTED = 'You need to commit all modified files before running Checkstyle\n'
@@ -182,9 +183,12 @@ def _ExecuteCheckstyle(java_files, classpath, config_xml):
                              stdout=subprocess.PIPE, env=checkstyle_env,
                              universal_newlines=True)
     stdout, _ = check.communicate()
+    stdout_lines = stdout.splitlines()
     # A work-around for Checkstyle printing error count to stdio.
-    if '</checkstyle>' in stdout.splitlines()[-2]:
-      stdout = '\n'.join(stdout.splitlines()[:-1])
+    if len(stdout_lines) < 2:
+      stdout = stdout_lines[0]
+    elif len(stdout_lines) >= 2 and '</checkstyle>' in stdout_lines[-2]:
+      stdout = '\n'.join(stdout_lines[:-1])
     return stdout
   except OSError as e:
     if e.errno == errno.ENOENT:
