@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python
 
 #
 # Copyright 2015, The Android Open Source Project
@@ -65,7 +65,7 @@ FORCED_RULES = ['com.puppycrawl.tools.checkstyle.checks.imports.ImportOrderCheck
 SKIPPED_RULES_FOR_TEST_FILES = ['com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTypeCheck',
                                 'com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck']
 SUBPATH_FOR_TEST_FILES = ['/tests/', '/test/', '/androidTest/', '/perftests/', '/gts-tests/',
-                          '/hostsidetests/', '/jvmTest/']
+                          '/hostsidetests/']
 SUBPATH_FOR_TEST_DATA_FILES = _FindFoldersContaining(git.repository_root(),
                                                      'IGNORE_CHECKSTYLE')
 ERROR_UNCOMMITTED = 'You need to commit all modified files before running Checkstyle\n'
