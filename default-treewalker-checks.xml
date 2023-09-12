@@ -158,6 +158,8 @@
   <property name="ordered" value="true"/>
   <property name="option" value="top"/>
   <property name="separated" value="true"/>
+  <property name="separatedStaticGroups" value="true"/>
+  <property name="staticGroups" value="android, androidx, com.android, dalvik, com, dagger, gov, io, junit, libcore, net, kotlin, org, perfetto, java, javax"/>
 </module>
 <module name="Indentation">
   <property name="severity" value="error"/>
