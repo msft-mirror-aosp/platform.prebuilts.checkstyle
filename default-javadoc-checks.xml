@@ -23,10 +23,15 @@
 </module>
 <module name="JavadocMethod">
   <property name="severity" value="error"/>
+  <property name="tokens" value="METHOD_DEF"/>
+  <property name="validateThrows" value="false"/>
+  <property name="allowMissingParamTags" value="true"/>
+  <property name="allowMissingReturnTag" value="true"/>
+</module>
+<module name="MissingJavadocMethod">
   <property name="scope" value="public"/>
   <property name="tokens" value="METHOD_DEF"/>
-  <property name="allowMissingParamTags" value="true"/>
   <property name="allowMissingPropertyJavadoc" value="true"/>
-  <property name="allowMissingReturnTag" value="true"/>
-  <property name="allowMissingThrowsTags" value="true"/>
+  <property name="allowedAnnotations" value="Override,Test,Before,After,Parameterized.Parameters"/>
+  <property name="ignoreMethodNamesRegex" value="^test.*$"/>
 </module>
