@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 #
 # Copyright 2015, The Android Open Source Project
@@ -65,7 +65,7 @@ FORCED_RULES = ['com.puppycrawl.tools.checkstyle.checks.imports.ImportOrderCheck
 SKIPPED_RULES_FOR_TEST_FILES = ['com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTypeCheck',
                                 'com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck']
 SUBPATH_FOR_TEST_FILES = ['/tests/', '/test/', '/androidTest/', '/perftests/', '/gts-tests/',
-                          '/hostsidetests/']
+                          '/hostsidetests/', '/jvmTest/', '/robotests/']
 SUBPATH_FOR_TEST_DATA_FILES = _FindFoldersContaining(git.repository_root(),
                                                      'IGNORE_CHECKSTYLE')
 ERROR_UNCOMMITTED = 'You need to commit all modified files before running Checkstyle\n'
@@ -177,7 +177,9 @@ def _ExecuteCheckstyle(java_files, classpath, config_xml):
   checkstyle_env['JAVA_CMD'] = 'java'
 
   try:
-    check = subprocess.Popen(['java', '-cp', classpath,
+    check = subprocess.Popen(['java',
+                              '-Dcheckstyle.enableExternalDtdLoad=true',
+                              '-cp', classpath,
                               'com.puppycrawl.tools.checkstyle.Main', '-c',
                               config_xml, '-f', 'xml'] + java_files,
                              stdout=subprocess.PIPE, env=checkstyle_env,
