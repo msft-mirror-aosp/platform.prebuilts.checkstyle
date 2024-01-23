@@ -177,9 +177,7 @@ def _ExecuteCheckstyle(java_files, classpath, config_xml):
   checkstyle_env['JAVA_CMD'] = 'java'
 
   try:
-    check = subprocess.Popen(['java',
-                              '-Dcheckstyle.enableExternalDtdLoad=true',
-                              '-cp', classpath,
+    check = subprocess.Popen(['java', '-cp', classpath,
                               'com.puppycrawl.tools.checkstyle.Main', '-c',
                               config_xml, '-f', 'xml'] + java_files,
                              stdout=subprocess.PIPE, env=checkstyle_env,
