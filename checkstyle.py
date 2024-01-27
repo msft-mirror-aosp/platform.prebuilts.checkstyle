@@ -160,6 +160,19 @@ def _PrintErrorsAndWarnings(errors, warnings):
   if warnings:
     print('WARNINGS:\n' + '\n'.join(warnings))
 
+def _CheckForJava():
+  try:
+    java_env = os.environ.copy()
+    java_env['JAVA_CMD'] = 'java'
+    check = subprocess.Popen(['java', '--help'],
+                             stdout=subprocess.PIPE, env=java_env,
+                             universal_newlines=True)
+    stdout, _ = check.communicate()
+    stdout_lines = stdout.splitlines()
+  except OSError as e:
+    if e.errno == errno.ENOENT:
+      print('Error: Could not find `java` on path!')
+      sys.exit(1)
 
 def _ExecuteCheckstyle(java_files, classpath, config_xml):
   """Runs Checkstyle to check give Java files for style errors.
@@ -194,6 +207,7 @@ def _ExecuteCheckstyle(java_files, classpath, config_xml):
     return stdout
   except OSError as e:
     if e.errno == errno.ENOENT:
+      _CheckForJava()
       print('Error running Checkstyle!')
       sys.exit(1)
 
