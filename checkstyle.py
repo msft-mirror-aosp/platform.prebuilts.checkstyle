@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 #
 # Copyright 2015, The Android Open Source Project
@@ -65,7 +65,7 @@ FORCED_RULES = ['com.puppycrawl.tools.checkstyle.checks.imports.ImportOrderCheck
 SKIPPED_RULES_FOR_TEST_FILES = ['com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTypeCheck',
                                 'com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck']
 SUBPATH_FOR_TEST_FILES = ['/tests/', '/test/', '/androidTest/', '/perftests/', '/gts-tests/',
-                          '/hostsidetests/']
+                          '/hostsidetests/', '/jvmTest/', '/robotests/', '/robolectric/']
 SUBPATH_FOR_TEST_DATA_FILES = _FindFoldersContaining(git.repository_root(),
                                                      'IGNORE_CHECKSTYLE')
 ERROR_UNCOMMITTED = 'You need to commit all modified files before running Checkstyle\n'
@@ -160,6 +160,19 @@ def _PrintErrorsAndWarnings(errors, warnings):
   if warnings:
     print('WARNINGS:\n' + '\n'.join(warnings))
 
+def _CheckForJava():
+  try:
+    java_env = os.environ.copy()
+    java_env['JAVA_CMD'] = 'java'
+    check = subprocess.Popen(['java', '--help'],
+                             stdout=subprocess.PIPE, env=java_env,
+                             universal_newlines=True)
+    stdout, _ = check.communicate()
+    stdout_lines = stdout.splitlines()
+  except OSError as e:
+    if e.errno == errno.ENOENT:
+      print('Error: Could not find `java` on path!')
+      sys.exit(1)
 
 def _ExecuteCheckstyle(java_files, classpath, config_xml):
   """Runs Checkstyle to check give Java files for style errors.
@@ -177,7 +190,9 @@ def _ExecuteCheckstyle(java_files, classpath, config_xml):
   checkstyle_env['JAVA_CMD'] = 'java'
 
   try:
-    check = subprocess.Popen(['java', '-cp', classpath,
+    check = subprocess.Popen(['java',
+                              '-Dcheckstyle.enableExternalDtdLoad=true',
+                              '-cp', classpath,
                               'com.puppycrawl.tools.checkstyle.Main', '-c',
                               config_xml, '-f', 'xml'] + java_files,
                              stdout=subprocess.PIPE, env=checkstyle_env,
@@ -192,6 +207,7 @@ def _ExecuteCheckstyle(java_files, classpath, config_xml):
     return stdout
   except OSError as e:
     if e.errno == errno.ENOENT:
+      _CheckForJava()
       print('Error running Checkstyle!')
       sys.exit(1)
 
