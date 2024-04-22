@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 #
 # Copyright 2015, The Android Open Source Project
@@ -17,6 +17,8 @@
 #
 
 """Script that is used by developers to run style checks on Java files."""
+
+from __future__ import print_function
 
 import argparse
 import errno
@@ -62,7 +64,8 @@ FORCED_RULES = ['com.puppycrawl.tools.checkstyle.checks.imports.ImportOrderCheck
                 'com.puppycrawl.tools.checkstyle.checks.imports.UnusedImportsCheck']
 SKIPPED_RULES_FOR_TEST_FILES = ['com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocTypeCheck',
                                 'com.puppycrawl.tools.checkstyle.checks.javadoc.JavadocMethodCheck']
-SUBPATH_FOR_TEST_FILES = ['/tests/', '/test/', '/androidTest/', '/perftests/']
+SUBPATH_FOR_TEST_FILES = ['/tests/', '/test/', '/androidTest/', '/perftests/', '/gts-tests/',
+                          '/hostsidetests/', '/jvmTest/', '/robotests/', '/robolectric/']
 SUBPATH_FOR_TEST_DATA_FILES = _FindFoldersContaining(git.repository_root(),
                                                      'IGNORE_CHECKSTYLE')
 ERROR_UNCOMMITTED = 'You need to commit all modified files before running Checkstyle\n'
@@ -81,7 +84,7 @@ def RunCheckstyleOnFiles(java_files, classpath=CHECKSTYLE_JAR, config_xml=CHECKS
     A tuple of errors and warnings.
   """
   print('Running Checkstyle on inputted files')
-  java_files = map(os.path.abspath, java_files)
+  java_files = list(map(os.path.abspath, java_files))
   stdout = _ExecuteCheckstyle(java_files, classpath, config_xml)
   (errors, warnings) = _ParseAndFilterOutput(stdout)
   _PrintErrorsAndWarnings(errors, warnings)
@@ -117,14 +120,14 @@ def RunCheckstyleOnACommit(commit,
   print('Running Checkstyle on %s commit' % commit)
   commit_modified_files = _GetModifiedFiles(commit, explicit_commit)
   commit_modified_files = _FilterFiles(commit_modified_files, file_whitelist)
-  if not commit_modified_files.keys():
+  if not list(commit_modified_files.keys()):
     print('No Java files to check')
     return [], []
 
   (tmp_dir, tmp_file_map) = _GetTempFilesForCommit(
-      commit_modified_files.keys(), commit)
+      list(commit_modified_files.keys()), commit)
 
-  java_files = tmp_file_map.keys()
+  java_files = list(tmp_file_map.keys())
   stdout = _ExecuteCheckstyle(java_files, classpath, config_xml)
 
   # Remove all the temporary files.
@@ -152,14 +155,24 @@ def _WarnIfUntrackedFiles(out=sys.stdout):
 
 def _PrintErrorsAndWarnings(errors, warnings):
   """Prints given errors and warnings."""
-  system_encoding = sys.getdefaultencoding()
-  if (system_encoding == 'ascii'):
-    system_encoding = 'UTF-8'
   if errors:
-    print('ERRORS:\n' + '\n'.join(map(lambda x: x.encode(system_encoding), errors)))
+    print('ERRORS:\n' + '\n'.join(errors))
   if warnings:
-    print('WARNINGS:\n' + '\n'.join(map(lambda x: x.encode(system_encoding), warnings)))
+    print('WARNINGS:\n' + '\n'.join(warnings))
 
+def _CheckForJava():
+  try:
+    java_env = os.environ.copy()
+    java_env['JAVA_CMD'] = 'java'
+    check = subprocess.Popen(['java', '--help'],
+                             stdout=subprocess.PIPE, env=java_env,
+                             universal_newlines=True)
+    stdout, _ = check.communicate()
+    stdout_lines = stdout.splitlines()
+  except OSError as e:
+    if e.errno == errno.ENOENT:
+      print('Error: Could not find `java` on path!')
+      sys.exit(1)
 
 def _ExecuteCheckstyle(java_files, classpath, config_xml):
   """Runs Checkstyle to check give Java files for style errors.
@@ -177,17 +190,24 @@ def _ExecuteCheckstyle(java_files, classpath, config_xml):
   checkstyle_env['JAVA_CMD'] = 'java'
 
   try:
-    check = subprocess.Popen(['java', '-cp', classpath,
+    check = subprocess.Popen(['java',
+                              '-Dcheckstyle.enableExternalDtdLoad=true',
+                              '-cp', classpath,
                               'com.puppycrawl.tools.checkstyle.Main', '-c',
                               config_xml, '-f', 'xml'] + java_files,
-                             stdout=subprocess.PIPE, env=checkstyle_env)
+                             stdout=subprocess.PIPE, env=checkstyle_env,
+                             universal_newlines=True)
     stdout, _ = check.communicate()
+    stdout_lines = stdout.splitlines()
     # A work-around for Checkstyle printing error count to stdio.
-    if '</checkstyle>' in stdout.splitlines()[-2]:
-      stdout = '\n'.join(stdout.splitlines()[:-1])
+    if len(stdout_lines) < 2:
+      stdout = stdout_lines[0]
+    elif len(stdout_lines) >= 2 and '</checkstyle>' in stdout_lines[-2]:
+      stdout = '\n'.join(stdout_lines[:-1])
     return stdout
   except OSError as e:
     if e.errno == errno.ENOENT:
+      _CheckForJava()
       print('Error running Checkstyle!')
       sys.exit(1)
 
@@ -314,7 +334,7 @@ def _GetTempFilesForCommit(file_names, commit):
     if not os.path.exists(os.path.dirname(tmp_file_name)):
       os.makedirs(os.path.dirname(tmp_file_name))
 
-    tmp_file = open(tmp_file_name, 'w')
+    tmp_file = open(tmp_file_name, 'wb')
     tmp_file.write(content)
     tmp_file.close()
     tmp_file_names[tmp_file_name] = file_name
