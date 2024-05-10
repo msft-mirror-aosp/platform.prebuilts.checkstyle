@@ -81,11 +81,6 @@
   <property name="format" value="^m|s|((([ms][a-z0-9])|([a-ln-rt-z]))[a-zA-Z0-9]*)$"/>
   <message key="name.invalidPattern" value="Local variables should be camel-cased (e.g. int minWidth = 4)."/>
 </module>
-<module name="LineLength">
-  <property name="severity" value="error"/>
-  <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://|^ *\*? \{@link .*$"/>
-  <property name="max" value="100"/>
-</module>
 <module name="LeftCurly">
   <property name="severity" value="error"/>
 </module>
@@ -159,10 +154,12 @@
 <module name="ImportOrder">
   <property name="severity" value="error"/>
   <message key="import.ordering" value="Wrong order for {0} import. Use Ctrl+Shift+O (Eclipse) or Ctrl+Alt+O (Intellij) to sort imports. https://source.android.com/setup/code-style#order-import-statements"/>
-  <property name="groups" value="android, androidx, com.android, dalvik, com, dagger, gov, junit, libcore, net, kotlin, org, java, javax"/>
+  <property name="groups" value="android, androidx, com.android, dalvik, com, dagger, gov, io, junit, junitparams, libcore, net, kotlin, kotlinx, org, perfetto, vendor, java, javax"/>
   <property name="ordered" value="true"/>
   <property name="option" value="top"/>
   <property name="separated" value="true"/>
+  <property name="separatedStaticGroups" value="true"/>
+  <property name="staticGroups" value="android, androidx, com.android, dalvik, com, dagger, gov, io, junit, junitparams, libcore, net, kotlin, kotlinx, org, perfetto, java, javax"/>
 </module>
 <module name="Indentation">
   <property name="severity" value="error"/>
@@ -211,7 +208,6 @@
 <module name="OuterTypeFilename">
   <property name="severity" value="error"/>
 </module>
-<module name="FileContentsHolder"/>
 <module name="SuppressionCommentFilter">
   <property name="offCommentFormat" value="CHECKSTYLE:OFF IndentationCheck"/>
   <property name="onCommentFormat" value="CHECKSTYLE:ON IndentationCheck"/>
