@@ -21,11 +21,11 @@ It can be invoked in two ways.
 A development tool to help programmers write Java code that adheres to a
 coding standard.
 
-*   URL: https://checkstyle.sourceforge.io/
-*   Version: 7.4-SNAPSHOT
+*   URL: https://checkstyle.sourceforge.io
+*   Version: 10.12.3
 *   License: LGPL 2.1
 *   License File: LICENSE
-*   Source repo: https://android.googlesource.com/platform/external/checkstyle
+*   Source repo: https://github.com/checkstyle/checkstyle
 
 ### Git-Lint
 
